@@ -1,9 +1,10 @@
-# Common block
-# Builds network and OSpackages
 ---
 - hosts: all
-
   sudo: true
-
   roles:
    - common
+
+- hosts: controller
+  sudo: true
+  roles:
+   - controller

@@ -1,0 +1,24 @@
+- name: install MariaDB
+  yum:
+    name: mariadb
+    state: present
+
+- name: install MariaDB-Server
+  yum:
+    name: mariadb-server
+    state: present
+
+- name: install PyMySQL (python2)
+  yum:
+    name: python2-PyMySQL
+    state: present
+- name: modify MariaDB file
+  template:
+    src=mariadb.j2
+    dest=/etc/my.cnf.d/openstack.cnf
+
+- name: start database service (1/2)
+  shell: systemctl enable mariadb.service
+
+- name: start database service (2/2)
+  shell: systemctl start mariadb.service
