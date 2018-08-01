@@ -1,0 +1,24 @@
+---
+- name: install chrony
+  yum:
+    name: chrony
+    state: present
+
+# This goes for controller
+- name: add server to chrony (controller)
+  shell: echo 'server pool.ntp.org iburst' > /etc/chrony.conf
+  when: (inventory_hostname == "controller")
+-
+  name: add allowance to chrony (controller)
+  shell: echo 'allow "{{ansible_default_ipv4.address}}"' >> /etc/chrony.conf
+  when: (inventory_hostname == "controller")
+
+# this goes for compute
+- name: add controller to chrony (compute)
+  shell: echo "server controller iburst" > /etc/chrony.conf
+  when: (inventory_hostname == "compute")
+
+- name: start NTP system and configure when system boots
+  shell: systemctl enable chronyd.service
+- name: starting NTP
+  shell: systemctl start chronyd.service

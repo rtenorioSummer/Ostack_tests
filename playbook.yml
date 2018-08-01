@@ -7,5 +7,3 @@
 
   roles:
    - common
-   - {role: "controller", when: (inventory_hostname == "controller")}
-   - {role: "compute", when: (inventory_hostname == "compute")}
