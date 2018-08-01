@@ -3,3 +3,4 @@
   sudo: true
   tasks:
    - include: tasks/network.yml
+   - include: tasks/NTP.yml

@@ -16,14 +16,11 @@ Vagrant.configure(2) do |config|
     config.vm.network "private_network",
                       ip: "#{info[:ip]}",
                       netmask: "#{info[:netmask]}"
-   # config.vm.provision "shell",
-   #                     run: "always",
-   #                     inline: "route add default gw #{info[:gateaway]}"
     config.vm.hostname = hostname
 
 
          config.vm.provision :ansible do |ansible|
- 		ansible.playbook= "playbooks/"+hostname+"/playbook.yml"
- 	end
+ 		        ansible.playbook= "playbooks/"+hostname+"/playbook.yml"
+ 	        end
   end
 end

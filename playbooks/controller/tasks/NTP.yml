@@ -1,0 +1,13 @@
+---
+- name: install chrony
+  yum:
+    name: chrony
+    state: present
+
+- name: modify chrony
+  shell: echo 'server .pool.ntp.org iburst' > /etc/chrony.conf
+  shell: echo 'allow "{{ansible_default_ipv4.address}}"' >> /etc/chrony.conf
+
+- name: start NTP system and configure when system boots
+  shell: systemctl enable chronyd.service
+  shell: systemctl start chronyd.service

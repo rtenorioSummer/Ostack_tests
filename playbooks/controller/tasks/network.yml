@@ -1,9 +1,4 @@
 ---
-- name: install chrony
-  yum:
-    name: chrony
-    state: present
-
 - name: modify ifcfg-eth0
   template:
    src=interface_config.j2
@@ -13,12 +8,3 @@
   template:
    src=hosts.j2
    dest=/etc/hosts
-
-
-- name: modify chrony
-  shell: echo 'server "{{inventory_hostname}}" iburst' > /etc/chrony.conf
-  shell: echo 'allow "{{ansible_default_ipv4.address}}"' >> /etc/chrony.conf
-
-- name: start NTP system and configure when system boots
-  shell: systemctl enable chronyd.service
-  shell: systemctl start chronyd.service
