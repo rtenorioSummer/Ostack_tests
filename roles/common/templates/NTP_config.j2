@@ -1,0 +1,6 @@
+{% if inventory_hostname == "controller" %}
+ {% set file_string='server pool.ntp.org iburst\nallow '+ansible_default_ipv4.address %}
+{% elif inventory_hostname == "compute" %}
+  {% set file_string='server controller iburst' %}
+{% endif %}
+{{file_string}}

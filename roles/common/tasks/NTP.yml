@@ -4,20 +4,25 @@
     name: chrony
     state: present
 
+- name: Add server to chrony
+  template:
+    src=NTP_config.j2
+    dest=/etc/chrony.conf
+
 # This goes for controller
-- name: add server to chrony (controller)
-  shell: echo 'server pool.ntp.org iburst\nallow "{{ansible_default_ipv4.address}}"' > /etc/chrony.conf
-  when: (inventory_hostname == "controller")
+# - name: add server to chrony (controller)
+#   shell: echo 'server pool.ntp.org iburst\nallow "{{ansible_default_ipv4.address}}"' > /etc/chrony.conf
+#   when: (inventory_hostname == "controller")
 # -name: add allowance to chrony (controller)
 #   shell: echo '' >> /etc/chrony.conf
 #   when: (inventory_hostname == "controller")
-
 # this goes for compute
-- name: add controller to chrony (compute)
-  shell: echo "server controller iburst" > /etc/chrony.conf
-  when: (inventory_hostname == "compute")
+# - name: add controller to chrony (compute)
+#   shell: echo "server controller iburst" > /etc/chrony.conf
+#   when: (inventory_hostname == "compute")
 
 - name: start NTP system and configure when system boots
   shell: systemctl enable chronyd.service
+
 - name: starting NTP
   shell: systemctl start chronyd.service
