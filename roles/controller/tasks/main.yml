@@ -1,2 +1,4 @@
 ---
 - include: MariaDB.yml
+- include: RabbitMQ.yml
+- include: Memcached.yml

@@ -12,3 +12,10 @@
 ## mariadb
 - controller role created.
 - MariaDB installed in controller machine
+
+## RabbitMQ
+- Create user acount: Ansible must manage it (pending)
+- Password: Ansible-vault can encript files... messy for a VM?
+
+## Memcached
+- Edit /etc/sysconfing/memcached

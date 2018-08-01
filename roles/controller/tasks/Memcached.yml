@@ -1,0 +1,15 @@
+- name: install Memcached
+  yum:
+   name: memcached
+   state: present
+
+- name: install python-memcached
+  yum:
+   name: python-memcached
+   state: present
+
+- name: start memcached service (1/2)
+  shell: systemctl enable memcached.service
+
+- name: start memcached service (2/2)
+  shell: systemctl start  memcached.service

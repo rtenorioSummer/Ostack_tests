@@ -1,0 +1,16 @@
+- name: install RabbitMQ
+  yum:
+   name: rabbitmq-server
+   state: present
+
+- name: start message queue service (1/2)
+  shell: systemctl enable rabbitmq-server.service
+
+- name: start message queue service (2/2)
+  shell: systemctl start rabbitmq-server.service
+
+- name: adding openstack user (CAREFUL ANSIBLE INPUT WEAK PASSWORD)
+  shell: rabbitmqctl add_user openstack vagrant
+
+- name: setting permissions for the openstack user
+  shell: rabbitmqctl set_permissions openstack ".*" ".*" ".*"
