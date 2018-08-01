@@ -22,3 +22,6 @@
 
 - name: start database service (2/2)
   shell: systemctl start mariadb.service
+
+- name: _secure_ database (CHECK BEFORE USE)
+  shell: echo -ne "\n n" | mysql_secure_installation
