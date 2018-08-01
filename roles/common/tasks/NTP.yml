@@ -6,12 +6,11 @@
 
 # This goes for controller
 - name: add server to chrony (controller)
-  shell: echo 'server pool.ntp.org iburst' > /etc/chrony.conf
+  shell: echo 'server pool.ntp.org iburst\nallow "{{ansible_default_ipv4.address}}"' > /etc/chrony.conf
   when: (inventory_hostname == "controller")
--
-  name: add allowance to chrony (controller)
-  shell: echo 'allow "{{ansible_default_ipv4.address}}"' >> /etc/chrony.conf
-  when: (inventory_hostname == "controller")
+# -name: add allowance to chrony (controller)
+#   shell: echo '' >> /etc/chrony.conf
+#   when: (inventory_hostname == "controller")
 
 # this goes for compute
 - name: add controller to chrony (compute)

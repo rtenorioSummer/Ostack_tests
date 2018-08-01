@@ -1,17 +1,21 @@
-# ---
-# - name: extras repository
-#   yum:
-#    name: centos-release-openstack-queens
-#    skip_broken: yes
-#
-# - name: upgrade packages
-#   yum:
-#    name: '*'
-#
-# - name: install client
-#   yum:
-#    name: python-openstackclient
-#
-# - name: install selinux
-#   yum:
-#    name: openstack-selinux
+---
+- name: extras repository
+  yum:
+   name: centos-release-openstack-queens
+   # skip_broken: yes
+- name: replace repo
+  copy:
+    src: ../files/CentOS-QEMU-EV.repo
+    dest: /etc/yum.repos.d/
+
+- name: upgrade packages
+  yum:
+    name: '*'
+
+- name: install client
+  yum:
+   name: python-openstackclient
+
+- name: install selinux
+  yum:
+   name: openstack-selinux
