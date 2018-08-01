@@ -6,8 +6,10 @@
 
 - name: modify chrony
   shell: echo 'server .pool.ntp.org iburst' > /etc/chrony.conf
+- name: more chrony
   shell: echo 'allow "{{ansible_default_ipv4.address}}"' >> /etc/chrony.conf
 
 - name: start NTP system and configure when system boots
   shell: systemctl enable chronyd.service
+- name: starting NTP
   shell: systemctl start chronyd.service

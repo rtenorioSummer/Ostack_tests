@@ -1,0 +1,11 @@
+# Common block
+# Builds network and OSpackages
+---
+- hosts: all
+
+  sudo: true
+
+  roles:
+   - common
+   - {role: "controller", when: (inventory_hostname == "controller")}
+   - {role: "compute", when: (inventory_hostname == "compute")}

@@ -9,4 +9,5 @@
 
 - name: start NTP system and configure when system boots
   shell: systemctl enable chronyd.service
+- name: now start chrony
   shell: systemctl start chronyd.service

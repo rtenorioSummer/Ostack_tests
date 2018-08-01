@@ -1,0 +1,2 @@
+---
+- include: NTP_compute.yml

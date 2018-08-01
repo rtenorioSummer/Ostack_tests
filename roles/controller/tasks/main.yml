@@ -1,0 +1,2 @@
+---
+- include: NTP_controller.yml

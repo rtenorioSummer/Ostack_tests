@@ -1,0 +1,17 @@
+# ---
+# - name: extras repository
+#   yum:
+#    name: centos-release-openstack-queens
+#    skip_broken: yes
+#
+# - name: upgrade packages
+#   yum:
+#    name: '*'
+#
+# - name: install client
+#   yum:
+#    name: python-openstackclient
+#
+# - name: install selinux
+#   yum:
+#    name: openstack-selinux
