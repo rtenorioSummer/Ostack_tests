@@ -1,4 +1,4 @@
-# Status 
+# Status: Environment
 
 ## Networking
 - Write less hardcoded plays and templates
@@ -14,8 +14,11 @@
 - MariaDB installed in controller machine
 
 ## RabbitMQ
-- Create user acount: Ansible must manage it (pending)
-- Password: Ansible-vault can encript files... messy for a VM?
+- Create user acount: Checks in user_list. If the user is there, don't create
+- Password: Ansible-vault can encript files... Currently vagrant password
 
 ## Memcached
-- Edit /etc/sysconfing/memcached
+- __CHECK__: Only Controller node?
+
+# Status: OpenStack
+To be done...
