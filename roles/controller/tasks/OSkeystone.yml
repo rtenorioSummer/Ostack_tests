@@ -1,0 +1,47 @@
+# - name: conecting to database acces client
+#   service:
+#     name: mariadb
+#     state: started
+- name: creating keystone database
+  mysql_db:
+    name: keystone
+    login_user: root
+    login_password: vagrant
+    state: present
+
+# CAREFUL ROOT USER IS AUTHOMATICALLY CREATED WITHOUT password
+# NEEDS TWO TASKS TO OVERWRITE
+# - name: overwritte password of root and set privileges
+#   mysql_user:
+#     user: root
+#     password: vagrant
+#     priv: 'keystone.*:ALL,GRANT'
+#     state: present
+
+
+- name: Installing packages that keystone needs
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - openstack-keystone
+    - httpd
+    - mod_wsgi
+
+- name: modify /etc/keystone/keystone.conf (CAREFUL PASSWORD)
+  replace:
+   path: /etc/keystone/keystone.conf
+   regexp: '\[database\]'
+   replace: '[database]\nconnection = mysql+pymysql://keystone:vagrant@controller/keystone'
+
+- name: modify provider (use fernet) in /etc/keystone/keystone.conf
+  replace:
+   path: /etc/keystone/keystone.conf
+   regexp: '\[token\]'
+   replace: '[token]\nprovider = fernet'
+
+# This is related to create user and set privileges block ....?
+# - name: populate Identity service databse
+#   command: su -s /bin/sh -c "keystone-manage db_sync" keystone
+
+# - name: Initialize fernet repositories
+#   shell:

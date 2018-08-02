@@ -3,3 +3,4 @@
 - include: RabbitMQ.yml
 - include: Memcached.yml
 - include: Etcd.yml
+- include: OSkeystone.yml

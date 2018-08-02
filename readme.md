@@ -1,3 +1,10 @@
+# Current Status:
+
+- OSkeystone.yml & MariaDB.yml: Problems with user/password.
+Sometimes works, sometimes doesn't.
+Main issue: root default user starts with no password. If it's changed
+(It is), idempotency has to be ensured. Something fails over there.
+
 # Status: Environment
 
 ## Networking
