@@ -1,0 +1,15 @@
+- name: install etcd
+  yum:
+    name: etcd
+    state:presetnt
+
+- name: enable acces via management network
+  template:
+    src=etcd.j2
+    dest=/etc/etcd/etcd.conf
+
+- name: enable etcd service (1/2)
+  shell: systemctl enable etcd
+
+- name: start etcd service (2/2)
+  shell: systemctl start etcd

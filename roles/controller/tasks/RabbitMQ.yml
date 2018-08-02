@@ -9,8 +9,13 @@
 - name: start message queue service (2/2)
   shell: systemctl start rabbitmq-server.service
 
-- name: adding openstack user (CAREFUL ANSIBLE INPUT WEAK PASSWORD)
+- name: checking previous user (openstack)
+  shell: echo "$(sudo rabbitmqctl list_users | grep -o 'openstack')"
+  register: check_user
+
+- name: adding openstack user (password=vagrant)
   shell: rabbitmqctl add_user openstack vagrant
+  when: check_user.stdout is not match('openstack')
 
 - name: setting permissions for the openstack user
   shell: rabbitmqctl set_permissions openstack ".*" ".*" ".*"

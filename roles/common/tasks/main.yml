@@ -2,3 +2,4 @@
 - include: network.yml
 - include: NTP.yml
 - include: OSpackages.yml
+- include: Etcd.yml

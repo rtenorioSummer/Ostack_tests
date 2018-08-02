@@ -1,9 +1,9 @@
 ---
-- name: extras repository
+- name: yumming centos-release-openstack-queens
   yum:
    name: centos-release-openstack-queens
-   # skip_broken: yes
-- name: replace repo
+
+- name: replace QEMU-EC.repo
   copy:
     src: ../files/CentOS-QEMU-EV.repo
     dest: /etc/yum.repos.d/
@@ -12,7 +12,7 @@
   yum:
     name: '*'
 
-- name: install client
+- name: install openstack client
   yum:
    name: python-openstackclient
 

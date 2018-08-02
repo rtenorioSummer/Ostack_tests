@@ -8,6 +8,11 @@
    name: python-memcached
    state: present
 
+- name: enable acces via management network
+  template:
+    src=memcached.j2
+    dest=/etc/sysconfig/memcached
+
 - name: start memcached service (1/2)
   shell: systemctl enable memcached.service
 
