@@ -1,7 +1,7 @@
 - name: install etcd
   yum:
     name: etcd
-    state:presetnt
+    state: present
 
 - name: enable acces via management network
   template:
