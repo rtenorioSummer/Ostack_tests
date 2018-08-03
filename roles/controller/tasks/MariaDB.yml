@@ -25,6 +25,12 @@
   pip:
     name: pexpect
 
+# - name: delete root vagrant user
+#   mysql_user:
+#     name: root
+#     state: absent
+#   when:
+
 - name: modify MariaDB file
   template:
     src=mariadb.j2
@@ -36,32 +42,21 @@
 - name: start database service (2/2)
   shell: systemctl start mariadb.service
 
-- name: create ~/.my.conf file with root user
-  template:
-    src: root.cnf.j2
-    dest: /root/.my.cnf
-
 # This is taken from https://injustfiveminutes.wordpress.com/2014/08/25/ansible-mysql_secure_installation-playbook/
 # TARGET: Ensure IDEMPOTENCY  of mariadb et al
 # 'localhost' needs to be the last item for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
-- name: Change root user password on first run
-  mysql_user:
-    login_user: root
-    login_password: vagrant
-    name: root
-    password: vagrant
-    host: "{{ item }}"
-  with_items:
-    - "{{ ansible_hostname }}"
-    - 127.0.0.1
-    - ::1
-    - localhost
 
 - name: _secure_ database (CHECK BEFORE USE)
   expect:
     command: mysql_secure_installation
     echo: yes
     responses:
-        '(enter for none)': 'vagrant'
-        'Y/n' : 'n'
+        '(enter for none)': ''
+        'Set root password' : 'Y'
+        'New password' : 'vagrant'
+        'enter' : 'vagrant'
+        'Remove anonymous' : 'Y'
+        'Disallow root' : 'Y'
+        'Remove test' : 'Y'
+        'Reload privilege' : 'Y'
