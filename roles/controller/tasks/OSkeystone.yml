@@ -1,7 +1,3 @@
-# - name: conecting to database acces client
-#   service:
-#     name: mariadb
-#     state: started
 - name: creating keystone database
   mysql_db:
     name: keystone
@@ -9,14 +5,19 @@
     login_password: vagrant
     state: present
 
-- name: set privileges root
+- name: set privileges keystone
   mysql_user:
     append_privs: yes
     login_user: root
     login_password: vagrant
-    user: root
-    priv: 'keystone.*:ALL,GRANT'
+    user: keystone
+    password: vagrant
+    priv: 'keystone.*:ALL'
+    host: "{{ item }}"
     state: present
+  with_items:
+    - localhost
+    - '%'
 
 - name: Installing packages that keystone needs
   yum:
@@ -26,28 +27,57 @@
     - httpd
     - mod_wsgi
 
-- name: modify /etc/keystone/keystone.conf (CAREFUL PASSWORD)
-  lineinfile:
-   path: /etc/keystone/keystone.conf
-   regexp: '^\[database\]$'
-   insertafter: '^\[database\]$'
-   line: 'connection = mysql+pymysql://keystone:vagrant@controller/keystone'
-   state: present
+- name: Keystone configuration file (PASSWORD vagrant)
+  template:
+    src: keystone_configuration.j2
+    dest: /etc/keystone/keystone.conf
 
-- name: modify provider (use fernet) in /etc/keystone/keystone.conf
-  lineinfile:
-   path: /etc/keystone/keystone.conf
-   regexp: '^\[token\]$'
-   insertafter: '^\[token\]$'
-   line: 'provider = fernet'
-   state: present
+##########################################################
+# CAREFUL: SHELL COMMANDS HERE
+- name: populate Identity service databse
+  shell: su -s /bin/sh -c "keystone-manage db_sync" keystone
 
-# This is related to create user and set privileges block ....?
-# - name: populate Identity service databse
-#   expect:
-#     command: keystone-manage db_sync
-#     responses:
-#       keystone
+- name: Initialize fernet repositories
+  shell: keystone-manage "{{ item }}" --keystone-user keystone --keystone-group keystone
+  with_items:
+    - fernet_setup
+    - credential_setup
 
-# - name: Initialize fernet repositories
-#   shell:
+- name: Bootstrap Identity service (CAREFUL PASSWORD)
+  command: keystone-manage bootstrap --bootstrap-password vagrant --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/  --bootstrap-region-id RegionOne
+##########################################################
+
+- name: Configure Apache HTTP server (controller)
+  template:
+    src: apache_config.j2
+    dest: /etc/httpd/conf/httpd.conf
+
+- name: Creating link to wsgi-keystone.conf file
+  file:
+    src: /usr/share/keystone/wsgi-keystone.conf
+    dest: /etc/httpd/conf.d/wsgi-keystone.conf
+    state: link
+
+- name: Start Apache HTTP service
+  service:
+    name: httpd
+    state: started
+
+- name: Profile file with environmental variables (NEEDS TO BE SOURCED)
+  template:
+    src: profile.j2
+    dest: /etc/profile
+
+- name: Sourcing Profile
+  shell: source /etc/profile
+  args:
+    executable: /bin/bash
+- name: (OPTIONAL) admin-openrc file (admin project env script)
+  template:
+    src: admin-openrc.j2
+    dest: /home/admin-openrc
+
+- name: (OPTIONAL) demo-openrc file (demo project env script)
+  template:
+    src: demo-openrc.j2
+    dest: /home/demo-openrc
