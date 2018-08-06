@@ -8,8 +8,10 @@
     src=etcd.j2
     dest=/etc/etcd/etcd.conf
 
-- name: enable etcd service (1/2)
-  shell: systemctl enable etcd
+- name: enable etcd service
+  service:
+    name: etcd
+    state: started
 
-- name: start etcd service (2/2)
-  shell: systemctl start etcd
+# - name: start etcd service (2/2)
+#   shell: systemctl start etcd

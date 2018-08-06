@@ -9,33 +9,14 @@
     login_password: vagrant
     state: present
 
-# CAREFUL ROOT USER IS AUTHOMATICALLY CREATED WITHOUT password
-# NEEDS TWO TASKS TO OVERWRITE
 - name: set privileges root
   mysql_user:
+    append_privs: yes
     login_user: root
     login_password: vagrant
     user: root
     priv: 'keystone.*:ALL,GRANT'
     state: present
-
-# - name: create ~/.my.conf file with root user
-#   template:
-#     src: root.cnf.j2
-#     dest: /root/.my.cnf
-
-# - name: Change root user password on first run
-#   mysql_user:
-#     login_user: root
-#     login_password: va
-#     name: root
-#     password: vagrant
-#     host: "{{ item }}"
-#   with_items:
-#     - "{{ ansible_hostname }}"
-#     - 127.0.0.1
-#     - ::1
-#     - localhost
 
 - name: Installing packages that keystone needs
   yum:
@@ -46,20 +27,27 @@
     - mod_wsgi
 
 - name: modify /etc/keystone/keystone.conf (CAREFUL PASSWORD)
-  replace:
+  lineinfile:
    path: /etc/keystone/keystone.conf
-   regexp: '\[database\]'
-   replace: '[database]\nconnection = mysql+pymysql://keystone:vagrant@controller/keystone'
+   regexp: '^\[database\]$'
+   insertafter: '^\[database\]$'
+   line: 'connection = mysql+pymysql://keystone:vagrant@controller/keystone'
+   state: present
 
 - name: modify provider (use fernet) in /etc/keystone/keystone.conf
-  replace:
+  lineinfile:
    path: /etc/keystone/keystone.conf
-   regexp: '\[token\]'
-   replace: '[token]\nprovider = fernet'
+   regexp: '^\[token\]$'
+   insertafter: '^\[token\]$'
+   line: 'provider = fernet'
+   state: present
 
 # This is related to create user and set privileges block ....?
 # - name: populate Identity service databse
-#   command: su -s /bin/sh -c "keystone-manage db_sync" keystone
+#   expect:
+#     command: keystone-manage db_sync
+#     responses:
+#       keystone
 
 # - name: Initialize fernet repositories
 #   shell:

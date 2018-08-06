@@ -22,7 +22,9 @@
 #   when: (inventory_hostname == "compute")
 
 - name: start NTP system and configure when system boots
-  shell: systemctl enable chronyd.service
+  service:
+    name: chronyd.service
+    state: started
 
-- name: starting NTP
-  shell: systemctl start chronyd.service
+# - name: starting NTP
+#   shell: systemctl start chronyd.service

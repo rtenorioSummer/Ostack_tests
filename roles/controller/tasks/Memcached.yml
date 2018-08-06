@@ -13,8 +13,10 @@
     src=memcached.j2
     dest=/etc/sysconfig/memcached
 
-- name: start memcached service (1/2)
-  shell: systemctl enable memcached.service
+- name: start memcached service
+  service:
+    name: memcached.service
+    state: started
 
-- name: start memcached service (2/2)
-  shell: systemctl start  memcached.service
+# - name: start memcached service (2/2)
+#   shell: systemctl start  memcached.service

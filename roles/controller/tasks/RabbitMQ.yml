@@ -3,12 +3,15 @@
    name: rabbitmq-server
    state: present
 
-- name: start message queue service (1/2)
-  shell: systemctl enable rabbitmq-server.service
+- name: start message queue service
+  service:
+    name: rabbitmq-server.service
+    state: started
+# - name: start message queue service (2/2)
+#   shell: systemctl start rabbitmq-server.service
 
-- name: start message queue service (2/2)
-  shell: systemctl start rabbitmq-server.service
 
+# This................ check
 - name: checking previous user (openstack)
   shell: echo "$(sudo rabbitmqctl list_users | grep -o 'openstack')"
   register: check_user

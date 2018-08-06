@@ -25,38 +25,45 @@
   pip:
     name: pexpect
 
-# - name: delete root vagrant user
-#   mysql_user:
-#     name: root
-#     state: absent
-#   when:
 
 - name: modify MariaDB file
   template:
     src=mariadb.j2
     dest=/etc/my.cnf.d/openstack.cnf
 
-- name: start database service (1/2)
-  shell: systemctl enable mariadb.service
+- name: start database service
+  service:
+    name: mariadb.service
+    state: started
 
-- name: start database service (2/2)
-  shell: systemctl start mariadb.service
+# - name: start database service (2/2)
+#   shell: systemctl start mariadb.service
 
 # This is taken from https://injustfiveminutes.wordpress.com/2014/08/25/ansible-mysql_secure_installation-playbook/
 # TARGET: Ensure IDEMPOTENCY  of mariadb et al
-# 'localhost' needs to be the last item for idempotency, see
-# http://ansible.cc/docs/modules.html#mysql-user
+- name: Check if .my.cnf exists
+  stat:
+    path: /root/.my.cnf
+  register: root_credentials
 
-- name: _secure_ database (CHECK BEFORE USE)
+- name: Secure database if .my.cnf does not exist
   expect:
     command: mysql_secure_installation
-    echo: yes
     responses:
-        '(enter for none)': ''
+        'Enter current password for root' : ''
         'Set root password' : 'Y'
         'New password' : 'vagrant'
-        'enter' : 'vagrant'
+        'enter new password' : 'vagrant'
         'Remove anonymous' : 'Y'
         'Disallow root' : 'Y'
         'Remove test' : 'Y'
         'Reload privilege' : 'Y'
+  when: root_credentials.stat.exists==False
+
+- name: copy .my.cnf file with root password credentials if doesnt exist
+  template:
+    src: root_credentials.j2
+    dest: /root/.my.cnf
+    owner: root
+    mode: 0600
+  when: root_credentials.stat.exists==False
