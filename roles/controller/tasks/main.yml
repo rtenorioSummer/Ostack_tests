@@ -4,3 +4,4 @@
 - include: Memcached.yml
 - include: Etcd.yml
 - include: OSkeystone.yml
+- include: OSglance.yml

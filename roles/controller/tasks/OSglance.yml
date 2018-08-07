@@ -1,0 +1,58 @@
+- name: creating glance database
+  mysql_db:
+    name: glance
+    login_user: root
+    login_password: "{{ mysql_password }}"
+    state: present
+
+- name: set privileges glance
+  mysql_user:
+    append_privs: yes
+    login_user: root
+    login_password: "{{ mysql_password }}"
+    user: glance
+    password: "{{ glance_password }}"
+    priv: 'glance.*:ALL'
+    host: "{{ item }}"
+    state: present
+  with_items:
+    - localhost
+    - '%'
+
+- name: openstack stuff
+  shell: source /home/admin-openrc && "{{ item }}"
+  with_items:
+    - openstack user create --domain default --password-prompt glance
+    - openstack role add --project service --user glance admin
+    - openstack service create --name glance --description "OpenStack Image" image
+    - openstack endpoint create --region RegionOne image public http://"{{controller_ip}}":9292
+    - openstack endpoint create --region RegionOne image internal http://"{{controller_ip}}":9292
+    - openstack endpoint create --region RegionOne image admin http://"{{controller_ip}}":9292
+
+- name: install glance
+  yum:
+    name: openstack-glance
+
+- name: glance-api.conf
+  template:
+    src: glance_configuration.j2
+    dest: /etc/glance/glance-api.conf
+
+- name: glance-registry.conf
+  template:
+    src: glance_registry.j2
+    dest: /etc/glance/glance-registry.conf
+
+
+##########################################################
+# CAREFUL: SHELL COMMANDS HERE
+- name: populate Image service databse
+  shell: su -s /bin/sh -c "glance-manage db_sync" glance
+
+- name: Start image services and start at booting
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - openstack-glance-api
+    - openstack-glance-registry

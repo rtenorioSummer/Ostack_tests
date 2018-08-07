@@ -52,8 +52,8 @@
     responses:
         'Enter current password for root' : ''
         'Set root password' : 'Y'
-        'New password' : 'vagrant'
-        'enter new password' : 'vagrant'
+        'New password' : "{{ mysql_password }}"
+        'enter new password' : "{{ mysql_password }}"
         'Remove anonymous' : 'Y'
         'Disallow root' : 'Y'
         'Remove test' : 'Y'

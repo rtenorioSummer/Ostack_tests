@@ -72,6 +72,7 @@
   shell: source /etc/profile
   args:
     executable: /bin/bash
+
 - name: (OPTIONAL) admin-openrc file (admin project env script)
   template:
     src: admin-openrc.j2
@@ -81,21 +82,25 @@
   template:
     src: demo-openrc.j2
     dest: /home/demo-openrc
+
 - name: check if service project exists
   shell: source /home/admin-openrc && openstack project show service
   register: result_service_p
   no_log: True
   ignore_errors: True
+
 - name: check if demo project exists [Ignore all errors]
   shell: source /home/admin-openrc && openstack project show demo
   register: result_demo_p
   no_log: True
   ignore_errors: True
+
 - name: check if user role exists
   shell: source /home/admin-openrc && openstack role show user
   register: user_role_exists
   no_log: True
   ignore_errors: True
+  
 - name: create demo and service os oprojects
   shell: source /home/admin-openrc && openstack project create --domain default  --description \""{{item.name}}"\" "{{item.tag}}"
   with_items:

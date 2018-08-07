@@ -5,6 +5,8 @@
    - common
 
 - hosts: controller
+  vars_files:
+    - credentials.yml
   sudo: true
   roles:
-   - controller
+    - controller
