@@ -1,7 +1,7 @@
 ---
 - include: MariaDB.yml
-- include: RabbitMQ.yml
-- include: Memcached.yml
-- include: Etcd.yml
+# - include: RabbitMQ.yml
+# - include: Memcached.yml
+# - include: Etcd.yml
 - include: OSkeystone.yml
 - include: OSglance.yml

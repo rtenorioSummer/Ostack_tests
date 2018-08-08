@@ -19,15 +19,54 @@
     - localhost
     - '%'
 
-- name: openstack stuff
-  shell: source /home/admin-openrc && "{{ item }}"
+
+- name: check if user glance exists
+  shell: source /home/admin-openrc && openstack user show glance
+  register: user_glance_exists
+  no_log: True
+  ignore_errors: True
+
+- name: check if service glance exists
+  shell: source /home/admin-openrc && openstack service show glance
+  register: service_glance_exists
+  no_log: True
+  ignore_errors: True
+
+- name: Create glance user
+  expect:
+    command: openstack user create --domain default --password-prompt glance
+    responses:
+      'User Password' : "{{ glance_user }}"
+  environment:
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: "{{ admin_pass }}"
+    - OS_AUTH_URL: "http://{{ controller_ip }}:5000/v3"
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2
+  when: user_glance_exists is failed
+
+
+- name: Openstack Stuff
+  command: "{{ item }}"
   with_items:
-    - openstack user create --domain default --password-prompt glance
     - openstack role add --project service --user glance admin
     - openstack service create --name glance --description "OpenStack Image" image
-    - openstack endpoint create --region RegionOne image public http://"{{controller_ip}}":9292
-    - openstack endpoint create --region RegionOne image internal http://"{{controller_ip}}":9292
-    - openstack endpoint create --region RegionOne image admin http://"{{controller_ip}}":9292
+    - openstack endpoint create --region RegionOne image public http://{{controller_ip}}:9292
+    - openstack endpoint create --region RegionOne image internal http://{{controller_ip}}:9292
+    - openstack endpoint create --region RegionOne image admin http://{{controller_ip}}:9292
+  environment:
+    - OS_PROJECT_DOMAIN_NAME: Default
+    - OS_USER_DOMAIN_NAME: Default
+    - OS_PROJECT_NAME: admin
+    - OS_USERNAME: admin
+    - OS_PASSWORD: "{{ admin_pass }}"
+    - OS_AUTH_URL: "http://{{ controller_ip }}:5000/v3"
+    - OS_IDENTITY_API_VERSION: 3
+    - OS_IMAGE_API_VERSION: 2
+  when: service_glance_exists is failed
 
 - name: install glance
   yum:

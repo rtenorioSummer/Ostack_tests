@@ -2,16 +2,16 @@
   mysql_db:
     name: keystone
     login_user: root
-    login_password: vagrant
+    login_password: "{{ mysql_password }}"
     state: present
 
 - name: set privileges keystone
   mysql_user:
     append_privs: yes
     login_user: root
-    login_password: vagrant
+    login_password: "{{ mysql_password }}"
     user: keystone
-    password: vagrant
+    password: "{{ keystone_password }}"
     priv: 'keystone.*:ALL'
     host: "{{ item }}"
     state: present
@@ -44,7 +44,7 @@
     - credential_setup
 
 - name: Bootstrap Identity service (CAREFUL PASSWORD)
-  command: keystone-manage bootstrap --bootstrap-password vagrant --bootstrap-admin-url http://controller:5000/v3/ --bootstrap-internal-url http://controller:5000/v3/ --bootstrap-public-url http://controller:5000/v3/  --bootstrap-region-id RegionOne
+  command: keystone-manage bootstrap --bootstrap-password "{{ keystone_password }}" --bootstrap-admin-url http://"{{ controller_ip}}":5000/v3/ --bootstrap-internal-url http://"{{ controller_ip }}":5000/v3/ --bootstrap-public-url http://"{{ controller_ip }}":5000/v3/  --bootstrap-region-id RegionOne
 ##########################################################
 
 - name: Configure Apache HTTP server (controller)
@@ -63,15 +63,6 @@
     name: httpd
     state: started
 
-- name: Profile file with environmental variables (NEEDS TO BE SOURCED)
-  template:
-    src: profile.j2
-    dest: /etc/profile
-
-- name: Sourcing Profile
-  shell: source /etc/profile
-  args:
-    executable: /bin/bash
 
 - name: (OPTIONAL) admin-openrc file (admin project env script)
   template:
@@ -100,7 +91,7 @@
   register: user_role_exists
   no_log: True
   ignore_errors: True
-  
+
 - name: create demo and service os oprojects
   shell: source /home/admin-openrc && openstack project create --domain default  --description \""{{item.name}}"\" "{{item.tag}}"
   with_items:

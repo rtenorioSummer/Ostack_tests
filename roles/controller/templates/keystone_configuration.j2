@@ -685,6 +685,8 @@ admin_token = vagrant
 
 [database]
 
+connection = mysql+pymysql://keystone:vagrant@10.0.2.15/keystone
+
 #
 # From oslo.db
 #
@@ -788,8 +790,6 @@ admin_token = vagrant
 # Maximum retries in case of connection error or deadlock error before error is
 # raised. Set to -1 to specify an infinite retry count. (integer value)
 #db_max_retries = 20
-
-connection = mysql+pymysql://keystone:vagrant@10.0.2.15/keystone
 
 [domain_config]
 
