@@ -4,9 +4,16 @@
   roles:
    - common
 
-- hosts: controller
+- hosts: compute
   vars_files:
     - credentials.yml
   sudo: true
   roles:
-    - controller
+    - compute
+
+# - hosts: controller
+#   vars_files:
+#     - credentials.yml
+#   sudo: true
+#   roles:
+#     - controller

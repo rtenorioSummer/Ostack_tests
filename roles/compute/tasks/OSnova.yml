@@ -1,0 +1,28 @@
+- name: Install nova packages
+  yum:
+    name: openstack-nova-compute
+
+- name: Edit nova config file
+  template:
+    src: nova.conf.j2
+    dest: /etc/nova/nova.conf
+
+# THIS MUST BE FIXED
+# - name: Check if compute node supports hardware acceleration
+#   shell: egrep -c '(vmx|svm)' /proc/cpuinfo
+  #register: hardware_acceleration
+  #ignore_errors: ture
+
+- name: Use QEMU instead of KVM if hardware acceleration not supported
+  template:
+    src: hardware_acceleration.j2
+    dest: /etc/nova/nova.conf
+#  when: hardware_acceleration.stdout == "0"
+
+- name: Start compute servicing
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - libvirtd
+    - openstack-nova-compute

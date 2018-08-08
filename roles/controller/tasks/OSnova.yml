@@ -1,4 +1,3 @@
-
 #prereqs
 - name: creating nova and nova_api database
   mysql_db:
@@ -32,6 +31,8 @@
 ##########################################################
 # CAREFUL: SHELL COMMANDS HERE
 
+# This is already done in OSkeystone.yml
+###-----------------------------------------##########
 - name:  admin-openrc file (admin project env script)
   template:
     src: admin-openrc.j2
@@ -41,6 +42,7 @@
   shell: source /home/admin-openrc.sh
   args:
     executable: /bin/bash
+###-----------------------------------------##########
 - name: check if user nova exists
   shell: " source /home/admin-openrc.sh && openstack user show nova"
   register: u_nova_result
@@ -61,35 +63,44 @@
   register: placement_service_exists
   no_log: True
   ignore_errors: True
+
 - name: create nova user
-  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password nova-vagrant nova"
+  shell: "source /home/admin-openrc.sh && openstack user create --domain default --password {{ nova_password }} nova"
   when: u_nova_result is failed
+
 - name: add admin role to nova user
-  shell: "source /home/admin-openrc.sh && openstack role add --project service --user nova admin --description \"OpenStack Compute\" compute"
+  shell: "source /home/admin-openrc.sh && openstack role add --project service --user nova admin" #--description \"OpenStack Compute\" compute"
   when: u_nova_result is failed
+
 - name: add admin role to nova user
   shell: " source /home/admin-openrc.sh && openstack service create --name nova"
   when: u_nova_result is failed
+
 - name: create nova service entity
   shell: "source /home/admin-openrc.sh && openstack service create --name nova --description \"OpenStack Compute\" compute"
   when: compute_service_exists is failed
+
 - name: create nova service API endpoints
-  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne compute {{ item }} http://controller:8774/v2.1/%\(tenant_id\)s'
+  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne compute {{ item }} http://{{ controller_ip }}:8774/v2.1/%\(tenant_id\)s'
   with_items:
     - public
     - internal
     - admin
+
 - name: create placement user
-  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password placement-vagrant placement"
+  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password {{ placement_password }} placement"
   when: u_placement_result is failed
+
 - name: add admin role to placement user
   shell: " source /home/admin-openrc.sh && openstack service create --name placement"
   when: u_placement_result is failed
+
 - name: create placement service entity
   shell: "source /home/admin-openrc.sh && openstack service create --name placement --description \"Placement API\" placement"
   when: placement_service_exists is failed
+
 - name: create placement service API endpoints
-  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne placement {{ item }} http://controller:8774/v2.1/%\(tenant_id\)s'
+  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne placement {{ item }} http://{{ controller_ip }}:8774/v2.1/%\(tenant_id\)s'
   with_items:
     - public
     - internal
@@ -128,16 +139,20 @@
   shell: nova-manage api_db sync
   become: true
   become_user: nova
+
 - name: register cell0
   shell: nova-manage cell_v2 map_cell0
   become: true
   become_user: nova
-- name: create cell1
+
+- name: create cell1 (THIS IS UGLY)
   shell: nova-manage cell_v2 create_cell --name=cell1 --verbose
   become: true
   become_user: nova
+  ignore_errors: true
+
 - name: populate database
-  shell: nova-managedb sync
+  shell: nova-manage db sync
   become: true
   become_user: nova
 

@@ -17,7 +17,7 @@
   register: check_user
 
 - name: adding openstack user (password=vagrant)
-  shell: rabbitmqctl add_user openstack vagrant
+  shell: "rabbitmqctl add_user openstack {{ rabbit_password }}"
   when: check_user.stdout is not match('openstack')
 
 - name: setting permissions for the openstack user
