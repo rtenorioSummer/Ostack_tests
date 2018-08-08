@@ -1,0 +1,156 @@
+
+#prereqs
+- name: creating nova and nova_api database
+  mysql_db:
+    name: '{{ item }}'
+    login_user: root
+    login_password: vagrant
+    state: present
+  with_items:
+        - nova
+        - nova_api
+        - nova_cell0
+
+- name: set privileges for nova and nova_api
+  mysql_user:
+    append_privs: yes
+    login_user: root
+    login_password: vagrant
+    user: nova
+    password: vagrant
+    priv: '{{ item.database }}.*:ALL'
+    host: "{{ item.host }}"
+    state: present
+  with_items:
+    - {host: localhost, database: nova }
+    - {host: '%', database: nova }
+    - {host: 'localhost', database: nova_api }
+    - {host: '%', database: nova_api }
+    - {host: 'localhost', database: nova_cell0 }
+    - {host: '%', database: nova_cell0 }
+
+##########################################################
+# CAREFUL: SHELL COMMANDS HERE
+
+- name:  admin-openrc file (admin project env script)
+  template:
+    src: admin-openrc.j2
+    dest: /home/admin-openrc.sh
+
+- name: Sourcing Profile
+  shell: source /home/admin-openrc.sh
+  args:
+    executable: /bin/bash
+- name: check if user nova exists
+  shell: " source /home/admin-openrc.sh && openstack user show nova"
+  register: u_nova_result
+  ignore_errors: True
+  no_log: True
+- name: check if user placement exists
+  shell: " source /home/admin-openrc.sh && openstack user show nova"
+  register: u_placement_result
+  ignore_errors: True
+  no_log: True
+- name: check if compute service exists
+  shell: source /home/admin-openrc && openstack service show compute
+  register: compute_service_exists
+  no_log: True
+  ignore_errors: True
+- name: check if placement service exists
+  shell: source /home/admin-openrc && openstack service show placement
+  register: placement_service_exists
+  no_log: True
+  ignore_errors: True
+- name: create nova user
+  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password nova-vagrant nova"
+  when: u_nova_result is failed
+- name: add admin role to nova user
+  shell: "source /home/admin-openrc.sh && openstack role add --project service --user nova admin --description \"OpenStack Compute\" compute"
+  when: u_nova_result is failed
+- name: add admin role to nova user
+  shell: " source /home/admin-openrc.sh && openstack service create --name nova"
+  when: u_nova_result is failed
+- name: create nova service entity
+  shell: "source /home/admin-openrc.sh && openstack service create --name nova --description \"OpenStack Compute\" compute"
+  when: compute_service_exists is failed
+- name: create nova service API endpoints
+  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne compute {{ item }} http://controller:8774/v2.1/%\(tenant_id\)s'
+  with_items:
+    - public
+    - internal
+    - admin
+- name: create placement user
+  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password placement-vagrant placement"
+  when: u_placement_result is failed
+- name: add admin role to placement user
+  shell: " source /home/admin-openrc.sh && openstack service create --name placement"
+  when: u_placement_result is failed
+- name: create placement service entity
+  shell: "source /home/admin-openrc.sh && openstack service create --name placement --description \"Placement API\" placement"
+  when: placement_service_exists is failed
+- name: create placement service API endpoints
+  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne placement {{ item }} http://controller:8774/v2.1/%\(tenant_id\)s'
+  with_items:
+    - public
+    - internal
+    - admin
+##################################
+# installation
+- name: install nova
+  yum:
+   name: "{{ item }}"
+   state: present
+  with_items:
+    - openstack-nova-api
+    - openstack-nova-conductor
+    - openstack-nova-console
+    - openstack-nova-novncproxy
+    - openstack-nova-scheduler
+    - openstack-nova-placement-api
+
+- name:  copy nova.conf
+  template:
+   src: nova.conf.j2
+   dest: /etc/nova/nova.conf
+- name: copy 00-nova-placement-api.conf
+  template:
+   src: 00-nova-placement-api.conf.j2
+   dest: /etc/httpd/conf.d/00-nova-placement-api.conf
+  register: nova_api_conf_changed
+
+- name: restart http
+  service:
+   name: httpd
+   state: restarted
+  when: nova_api_conf_changed.changed
+
+- name: populate nova-api database
+  shell: nova-manage api_db sync
+  become: true
+  become_user: nova
+- name: register cell0
+  shell: nova-manage cell_v2 map_cell0
+  become: true
+  become_user: nova
+- name: create cell1
+  shell: nova-manage cell_v2 create_cell --name=cell1 --verbose
+  become: true
+  become_user: nova
+- name: populate database
+  shell: nova-managedb sync
+  become: true
+  become_user: nova
+
+- name: verify cells
+  shell: nova-manage cell_v2 list_cells
+
+- name: restart services
+  service: "{{ item }}"
+  state: restarted
+  with_items:
+    - openstack-nova-api
+    - openstack-nova-conductor
+    - openstack-nova-console
+    - openstack-nova-novncproxy
+    - openstack-nova-scheduler
+    - openstack-nova-placement-api
