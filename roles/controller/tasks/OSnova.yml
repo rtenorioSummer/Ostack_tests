@@ -28,28 +28,24 @@
     - {host: 'localhost', database: nova_cell0 }
     - {host: '%', database: nova_cell0 }
 
-##########################################################
-# CAREFUL: SHELL COMMANDS HERE
+- name: Restart firewalls
+  service:
+    name: firewalld
+    state: restarted
 
-# This is already done in OSkeystone.yml
-###-----------------------------------------##########
-- name:  admin-openrc file (admin project env script)
-  template:
-    src: admin-openrc.j2
-    dest: /home/admin-openrc.sh
+- name: Open 5672 port
+  shell: "firewall-cmd {{ item }}"
+  with_items:
+    - --zone=public --permanent --add-port=5672/tcp
+    - --reload
 
-- name: Sourcing Profile
-  shell: source /home/admin-openrc.sh
-  args:
-    executable: /bin/bash
-###-----------------------------------------##########
 - name: check if user nova exists
-  shell: " source /home/admin-openrc.sh && openstack user show nova"
+  shell: " source /home/admin-openrc && openstack user show nova"
   register: u_nova_result
   ignore_errors: True
   no_log: True
 - name: check if user placement exists
-  shell: " source /home/admin-openrc.sh && openstack user show nova"
+  shell: " source /home/admin-openrc && openstack user show nova"
   register: u_placement_result
   ignore_errors: True
   no_log: True
@@ -65,42 +61,39 @@
   ignore_errors: True
 
 - name: create nova user
-  shell: "source /home/admin-openrc.sh && openstack user create --domain default --password {{ nova_password }} nova"
+  shell: "source /home/admin-openrc && openstack user create --domain default --password {{ nova_password }} nova"
   when: u_nova_result is failed
 
 - name: add admin role to nova user
-  shell: "source /home/admin-openrc.sh && openstack role add --project service --user nova admin" #--description \"OpenStack Compute\" compute"
+  shell: "source /home/admin-openrc && openstack role add --project service --user nova admin" #--description \"OpenStack Compute\" compute"
   when: u_nova_result is failed
 
-- name: add admin role to nova user
-  shell: " source /home/admin-openrc.sh && openstack service create --name nova"
-  when: u_nova_result is failed
 
 - name: create nova service entity
-  shell: "source /home/admin-openrc.sh && openstack service create --name nova --description \"OpenStack Compute\" compute"
+  shell: "source /home/admin-openrc && openstack service create --name nova --description \"OpenStack Compute\" compute"
   when: compute_service_exists is failed
 
 - name: create nova service API endpoints
-  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne compute {{ item }} http://{{ controller_ip }}:8774/v2.1/%\(tenant_id\)s'
+  shell: 'source /home/admin-openrc &&  openstack endpoint create --region RegionOne compute {{ item }} http://{{ controller_ip }}:8774/v2.1'
   with_items:
     - public
     - internal
     - admin
 
 - name: create placement user
-  shell: " source /home/admin-openrc.sh && openstack user create --domain default --password {{ placement_password }} placement"
+  shell: " source /home/admin-openrc && openstack user create --domain default --password {{ placement_password }} placement"
   when: u_placement_result is failed
 
 - name: add admin role to placement user
-  shell: " source /home/admin-openrc.sh && openstack service create --name placement"
+  shell: " source /home/admin-openrc && openstack role add --project service --user placement admin"
   when: u_placement_result is failed
 
 - name: create placement service entity
-  shell: "source /home/admin-openrc.sh && openstack service create --name placement --description \"Placement API\" placement"
+  shell: "source /home/admin-openrc && openstack service create --name placement --description \"Placement API\" placement"
   when: placement_service_exists is failed
 
 - name: create placement service API endpoints
-  shell: 'source /home/admin-openrc.sh &&  openstack endpoint create --region RegionOne placement {{ item }} http://{{ controller_ip }}:8774/v2.1/%\(tenant_id\)s'
+  shell: 'source /home/admin-openrc &&  openstack endpoint create --region RegionOne placement {{ item }} http://{{ controller_ip }}:8774'
   with_items:
     - public
     - internal
@@ -161,11 +154,17 @@
 
 - name: restart services
   service: "{{ item }}"
-  state: restarted
+  state: started
   with_items:
     - openstack-nova-api
-    - openstack-nova-conductor
-    - openstack-nova-console
-    - openstack-nova-novncproxy
+    - openstack-nova-consoleauth
     - openstack-nova-scheduler
+    - openstack-nova-conductor
+    - openstack-nova-novncproxy
     - openstack-nova-placement-api
+
+- name: Open 8774 port
+  shell: "firewall-cmd {{ item }}"
+  with_items:
+    - --zone=public --permanent --add-port=8774/tcp
+    - --reload

@@ -1,5 +1,5 @@
 [DEFAULT]
-
+admin_bind_host = {{ controller_ip }}
 #
 # From keystone
 #
@@ -685,7 +685,7 @@ admin_token = vagrant
 
 [database]
 
-connection = mysql+pymysql://keystone:vagrant@10.0.2.15/keystone
+connection = mysql+pymysql://keystone:{{ keystone_password }}@{{ controller_ip }}/keystone
 
 #
 # From oslo.db

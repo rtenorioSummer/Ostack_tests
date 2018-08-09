@@ -1,8 +1,8 @@
 ---
-- name: modify ifcfg-eth0 file
+- name: modify ifcfg-eth1 file
   template:
    src=interface_config.j2
-   dest=/etc/sysconfig/network-scripts/ifcfg-eth0
+   dest=/etc/sysconfig/network-scripts/ifcfg-eth1
 
 - name: modify hosts file
   template:

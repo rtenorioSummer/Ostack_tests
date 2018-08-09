@@ -1923,7 +1923,7 @@
 
 [database]
 
-connection = mysql+pymysql://glance:vagrant@10.0.2.15/glance
+connection = mysql+pymysql://glance:{{ glance_password }}@{{ controller_ip }}/glance
 
 #
 # From oslo.db
@@ -3477,6 +3477,16 @@ filesystem_store_datadir = /var/lib/glance/images/
 
 [keystone_authtoken]
 
+auth_uri = http://{{ controller_ip }}:5000
+auth_url = http://{{ controller_ip }}:5000
+memcached_servers = {{ controller_ip }}:11211
+auth_type = password
+project_domain_name = Default
+user_domain_name = Default
+project_name = service
+username = glance
+password = {{ glance_password }}
+
 #
 # From keystonemiddleware.auth_token
 #
@@ -3665,16 +3675,6 @@ filesystem_store_datadir = /var/lib/glance/images/
 
 # Config Section from which to load plugin specific options (string value)
 #auth_section = <None>
-
-auth_uri = http://{{ controller_ip }}:5000
-auth_url = http://{{ controller_ip }}:5000
-memcached_servers = {{ controller_ip }}:11211
-auth_type = password
-project_domain_name = Default
-user_domain_name = Default
-project_name = service
-username = glance
-password = {{ glance_password }}
 
 [matchmaker_redis]
 

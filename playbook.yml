@@ -4,16 +4,26 @@
   roles:
    - common
 
+- hosts: controller
+  vars_files:
+    - credentials.yml
+  sudo: true
+  roles:
+    - controller
+
+
 - hosts: compute
   vars_files:
     - credentials.yml
   sudo: true
   roles:
     - compute
-
-# - hosts: controller
-#   vars_files:
-#     - credentials.yml
-#   sudo: true
-#   roles:
-#     - controller
+  handlers:
+  - name: restart keystone
+    service:
+     name: "{{ item }}"
+     state: restarted
+    with_items:
+       - openstack-keystone
+         - httpd
+         - mod_wsgi
