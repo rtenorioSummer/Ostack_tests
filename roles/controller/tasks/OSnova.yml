@@ -3,7 +3,7 @@
   mysql_db:
     name: '{{ item }}'
     login_user: root
-    login_password: vagrant
+    login_password: "{{ mysql_password }}"
     state: present
   with_items:
         - nova
@@ -14,9 +14,9 @@
   mysql_user:
     append_privs: yes
     login_user: root
-    login_password: vagrant
+    login_password: "{{ mysql_password }}"
     user: nova
-    password: vagrant
+    password: "{{ nova_password }}"
     priv: '{{ item.database }}.*:ALL'
     host: "{{ item.host }}"
     state: present
@@ -93,7 +93,7 @@
   when: placement_service_exists is failed
 
 - name: create placement service API endpoints
-  shell: 'source /home/admin-openrc &&  openstack endpoint create --region RegionOne placement {{ item }} http://{{ controller_ip }}:8774'
+  shell: 'source /home/admin-openrc &&  openstack endpoint create --region RegionOne placement {{ item }} http://{{ controller_ip }}:8778'
   with_items:
     - public
     - internal
@@ -154,7 +154,7 @@
 
 - name: restart services
   service: "{{ item }}"
-  state: started
+  state: restarted
   with_items:
     - openstack-nova-api
     - openstack-nova-consoleauth
