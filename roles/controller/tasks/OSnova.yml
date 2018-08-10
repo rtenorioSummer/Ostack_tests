@@ -28,16 +28,7 @@
     - {host: 'localhost', database: nova_cell0 }
     - {host: '%', database: nova_cell0 }
 
-- name: Restart firewalls
-  service:
-    name: firewalld
-    state: restarted
 
-- name: Open 5672 port
-  shell: "firewall-cmd {{ item }}"
-  with_items:
-    - --zone=public --permanent --add-port=5672/tcp
-    - --reload
 
 - name: check if user nova exists
   shell: " source /home/admin-openrc && openstack user show nova"
@@ -152,19 +143,31 @@
 - name: verify cells
   shell: nova-manage cell_v2 list_cells
 
-- name: restart services
-  service: "{{ item }}"
-  state: restarted
+
+
+- name: Restart firewalls
+  service:
+    name: firewalld
+    state: restarted
+
+- name: Open 5672 port
+  shell: "firewall-cmd {{ item }}"
   with_items:
-    - openstack-nova-api
-    - openstack-nova-consoleauth
-    - openstack-nova-scheduler
-    - openstack-nova-conductor
-    - openstack-nova-novncproxy
-    - openstack-nova-placement-api
+    - --zone=public --permanent --add-port=5672/tcp
+    - --reload
 
 - name: Open 8774 port
   shell: "firewall-cmd {{ item }}"
   with_items:
     - --zone=public --permanent --add-port=8774/tcp
     - --reload
+
+- name: restart services
+  shell: "systemctl start {{ item }}.service"
+  with_items:
+    - openstack-nova-api
+    - openstack-nova-console
+    - openstack-nova-scheduler
+    - openstack-nova-conductor
+    - openstack-nova-novncproxy
+    #- openstack-nova-placement-api
