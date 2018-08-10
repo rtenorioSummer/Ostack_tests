@@ -15,8 +15,5 @@
 
 - name: start memcached service
   service:
-    name: memcached.service
+    name: memcached
     state: started
-
-# - name: start memcached service (2/2)
-#   shell: systemctl start  memcached.service

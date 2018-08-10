@@ -17,7 +17,6 @@
   template:
     src: hardware_acceleration.j2
     dest: /etc/nova/nova.conf
-#  when: hardware_acceleration.stdout == "0"
 
 - name: Start compute servicing
   service:

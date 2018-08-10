@@ -5,11 +5,8 @@
 
 - name: start message queue service
   service:
-    name: rabbitmq-server.service
+    name: rabbitmq-server
     state: started
-# - name: start message queue service (2/2)
-#   shell: systemctl start rabbitmq-server.service
-
 
 # This................ check
 - name: checking previous user (openstack)

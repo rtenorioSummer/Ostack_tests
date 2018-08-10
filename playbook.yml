@@ -11,7 +11,6 @@
   roles:
     - controller
 
-
 - hosts: compute
   vars_files:
     - credentials.yml

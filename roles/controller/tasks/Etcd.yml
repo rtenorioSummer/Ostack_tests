@@ -12,6 +12,3 @@
   service:
     name: etcd
     state: started
-
-# - name: start etcd service (2/2)
-#   shell: systemctl start etcd
