@@ -1,0 +1,51 @@
+- name: creating neutron database
+  mysql_db:
+    name: neutron
+    login_user: root
+    login_password: "{{ mysql_password }}"
+    state: present
+
+- name: set privileges neutron
+  mysql_user:
+    append_privs: yes
+    login_user: root
+    login_password: "{{ mysql_password }}"
+    user: neutron
+    password: "{{ neutron_password }}"
+    priv: 'neutron.*:ALL'
+    host: "{{ item }}"
+    state: present
+  with_items:
+    - localhost
+    - '%'
+
+- name: check if user neutron exists
+  shell: " source /home/admin-openrc && openstack user show neutron"
+  register: u_neutron_result
+  ignore_errors: True
+  no_log: True
+
+
+- name: create neutron user
+  shell: "source /home/admin-openrc && openstack user create --domain default --password {{ neutron_password }} neutron"
+  when: u_neutron_result is failed
+
+- name: add admin role to neutron user
+  shell: "source /home/admin-openrc && openstack role add --project service --user neutron admin" #--description \"OpenStack Compute\" compute"
+  when: u_neutron_result is failed
+
+- name: create neutron service entity
+  shell: "source /home/admin-openrc && openstack service create --name neutron --description \"OpenStack Networking\" network"
+  when: compute_service_exists is failed
+
+- name: create neutron service API endpoints
+  shell: 'source /home/admin-openrc &&  openstack endpoint create --region RegionOne  network {{ item }} http://{{ controller_ip }}:9696'
+  with_items:
+    - public
+    - internal
+    - admin
+
+- name:  copy neutron.conf
+  template:
+   src: metadata_agent.j2
+   dest: /etc/neutron/metadata_agent.ini

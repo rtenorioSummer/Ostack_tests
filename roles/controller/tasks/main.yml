@@ -6,3 +6,4 @@
 - include: OSkeystone.yml
 - include: OSglance.yml
 - include: OSnova.yml
+- include: OSneutron.yml

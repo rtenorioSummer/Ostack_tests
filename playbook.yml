@@ -17,8 +17,10 @@
   vars_files:
     - credentials.yml
   sudo: true
+  
   roles:
     - compute
+
   handlers:
   - name: restart keystone
     service:

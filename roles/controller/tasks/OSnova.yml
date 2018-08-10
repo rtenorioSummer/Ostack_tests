@@ -59,7 +59,6 @@
   shell: "source /home/admin-openrc && openstack role add --project service --user nova admin" #--description \"OpenStack Compute\" compute"
   when: u_nova_result is failed
 
-
 - name: create nova service entity
   shell: "source /home/admin-openrc && openstack service create --name nova --description \"OpenStack Compute\" compute"
   when: compute_service_exists is failed
