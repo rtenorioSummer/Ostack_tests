@@ -106,6 +106,7 @@
   template:
    src: nova.conf.j2
    dest: /etc/nova/nova.conf
+
 - name: copy 00-nova-placement-api.conf
   template:
    src: 00-nova-placement-api.conf.j2
@@ -142,8 +143,6 @@
 - name: verify cells
   shell: nova-manage cell_v2 list_cells
 
-
-
 - name: Restart firewalls
   service:
     name: firewalld
@@ -162,7 +161,7 @@
     - --reload
 
 - name: restart services
-  shell: "systemctl start {{ item }}.service"
+  shell: "systemctl restart {{ item }}.service"
   with_items:
     - openstack-nova-api
     - openstack-nova-console

@@ -47,15 +47,6 @@ password = {{ nova_password }}
 [metrics]
 [mks]
 [neutron]
-url = http://{{ controller_ip }}:9696
-auth_url = http://{{ controller_ip }}:35357
-auth_type = password
-project_domain_name = default
-user_domain_name = default
-region_name = RegionOne
-project_name = service
-username = neutron
-password = {{ neutron_password }}
 [notifications]
 [osapi_v21]
 [oslo_concurrency]

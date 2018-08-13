@@ -1,0 +1,22 @@
+- name: Install packages Horizon
+  yum:
+   name: openstack-dashboard
+
+
+- name: Edit local_settings file [WARNING CHECK ALLOWED HOSTS]
+  template:
+    src: horizon_settings.j2
+    dest: /etc/openstack-dashboard/local_settings
+
+- name: Edit dahsboard configuration file
+  template:
+    src: dashboard_config.j2
+    dest: /etc/httpd/conf.d/openstack-dashboard.conf
+
+- name: restart httpd and memcached
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - httpd
+    - memcached

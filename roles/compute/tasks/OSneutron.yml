@@ -1,0 +1,32 @@
+- name: Install components
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - openstack-neutron-linuxbridge
+    - ebtables
+    - ipset
+
+- name: Configure common component
+  template:
+    src: neutron.conf.j2
+    dest: /etc/neutron/neutron.conf
+
+# Now configure network option 2
+- name: Linux bridge agent configuration
+  template:
+    src: linux_bridge.j2
+    dest: /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+################
+
+- name: Restart Compute API service
+  service:
+    name: openstack-nova-api
+    state: restarted
+
+- name: Start networking service
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - neutron-linuxbridge-agent
