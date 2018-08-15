@@ -1,10 +1,10 @@
 ---
-- include: MariaDB.yml
-- include: RabbitMQ.yml
-- include: Memcached.yml
-- include: Etcd.yml
-- include: OSkeystone.yml
-- include: OSglance.yml
-- include: OSnova.yml
-- include: OSneutron.yml
+# - include: MariaDB.yml
+# - include: RabbitMQ.yml
+# - include: Memcached.yml
+# - include: Etcd.yml
+# - include: OSkeystone.yml
+# - include: OSglance.yml
+# - include: OSnova.yml
+# - include: OSneutron.yml
 - include: OShorizon.yml

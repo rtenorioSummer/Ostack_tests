@@ -2,12 +2,11 @@ import os
 from django.utils.translation import ugettext_lazy as _
 from horizon.utils import secret_key
 from openstack_dashboard.settings import HORIZON_CONFIG
-DEBUG = False
+DEBUG = True
 WEBROOT = '/dashboard/'
 ALLOWED_HOSTS = ['*']
 LOCAL_PATH = "/tmp/"
-SECRET_KEY = secret_key.generate_or_read_from_file(
-    os.path.join(LOCAL_PATH, '.secret_key_store'))
+SECRET_KEY = "secret_key" #secret_key.generate_or_read_from_file(os.path.join(LOCAL_PATH, '.secret_key_store'))
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 

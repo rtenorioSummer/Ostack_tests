@@ -1,10 +1,10 @@
 ---
-- hosts: all
-  vars_files:
-    - credentials.yml
-  sudo: true
-  roles:
-   - common
+# - hosts: all
+#   vars_files:
+#     - credentials.yml
+#   sudo: true
+#   roles:
+#    - common
 
 - hosts: controller
   vars_files:
@@ -17,7 +17,7 @@
   vars_files:
     - credentials.yml
   sudo: true
-  
+
   roles:
     - compute
 

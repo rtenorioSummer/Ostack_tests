@@ -12,6 +12,19 @@
     src: dashboard_config.j2
     dest: /etc/httpd/conf.d/openstack-dashboard.conf
 
+###########################################################################################################################
+#  First Solution (works): SECRET_KEY must be given explicitly  (the function which generates it seems to rise an error)  #                                                                                                                      #
+###########################################################################################################################
+- name: Open 443 port
+  shell: "firewall-cmd --zone=public --permanent --add-port={{ item }} && firewall-cmd --reload"
+  with_items:
+    - 443/tcp
+    - 80/tcp
+    - 8774/tcp
+    - 5672/tcp
+
+
+
 - name: restart httpd and memcached
   service:
     name: "{{ item }}"
