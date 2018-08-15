@@ -160,6 +160,12 @@
     - --zone=public --permanent --add-port=8774/tcp
     - --reload
 
+- name: Open 80 port
+  shell: "firewall-cmd {{ item }}"
+  with_items:
+    - --zone=public --permanent --add-port=80/tcp
+    - --reload
+
 - name: restart services
   shell: "systemctl restart {{ item }}.service"
   with_items:

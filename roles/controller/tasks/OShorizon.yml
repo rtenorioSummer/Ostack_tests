@@ -2,7 +2,6 @@
   yum:
    name: openstack-dashboard
 
-
 - name: Edit local_settings file [WARNING CHECK ALLOWED HOSTS]
   template:
     src: horizon_settings.j2

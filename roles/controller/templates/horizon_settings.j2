@@ -5,7 +5,7 @@ from openstack_dashboard.settings import HORIZON_CONFIG
 DEBUG = False
 WEBROOT = '/dashboard/'
 ALLOWED_HOSTS = ['*']
-LOCAL_PATH = '/tmp'
+LOCAL_PATH = "/tmp/"
 SECRET_KEY = secret_key.generate_or_read_from_file(
     os.path.join(LOCAL_PATH, '.secret_key_store'))
 
